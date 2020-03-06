@@ -1,42 +1,49 @@
 class SwipeEvent {
-  startX: number;
-  deltaX: number;
-  startY: number;
-  deltaY: number;
-  elem: EventTarget;
+  sX: number;
+  dX: number;
+  sY: number;
+  dY: number;
+  el: EventTarget;
 
   constructor() {
-    document.addEventListener('touchstart', this.tStart, false);
-    document.addEventListener('touchmove', this.tMove, false);
-    document.addEventListener('touchend', this.tEnd, false);
+    document.addEventListener('touchstart', this.tS, false);
+    document.addEventListener('touchmove', this.tM, false);
+    document.addEventListener('touchend', this.tE, false);
   }
 
-  private tStart = (e: TouchEvent) => {
-    this.elem = e.target;
-    this.deltaX = 0;
-    this.deltaY = 0;
-    this.startX = e.touches[0].clientX;
-    this.startY = e.touches[0].clientY;
+  private tS = (e: TouchEvent) => {
+    this.el = e.target;
+    this.dX = 0;
+    this.dY = 0;
+    this.sX = e.touches[0].clientX;
+    this.sY = e.touches[0].clientY;
   }
 
-  private tMove = (e: TouchEvent) => {
-    if (this.elem === e.target) {
-      this.deltaX = this.startX - e.touches[0].clientX;
-      this.deltaY = this.startY - e.touches[0].clientY;
+  private tM = (e: TouchEvent) => {
+    if (this.el === e.target) {
+      this.dX = this.sX - e.touches[0].clientX;
+      this.dY = this.sY - e.touches[0].clientY;
     }
   }
 
-  private tEnd = (e: TouchEvent) => {
-    const dX = Math.abs(this.deltaX);
-    const dY = Math.abs(this.deltaY);
-    if (dX > dY) {
-      (this.startX - dX) > 0
-        ? this.elem.dispatchEvent(new CustomEvent('swipe-left', { bubbles: true }))
-        : this.elem.dispatchEvent(new CustomEvent('swipe-right', { bubbles: true }));
-    } else if (dX < dY) {
-      (this.startY - dY) > 0
-      ? this.elem.dispatchEvent(new CustomEvent('swipe-up', { bubbles: true }))
-      : this.elem.dispatchEvent(new CustomEvent('swipe-down', { bubbles: true }));
+  private tE = (e: TouchEvent) => {
+    const dx = Math.abs(this.dX);
+    const dy = Math.abs(this.dY);
+    const conf = { bubbles: true };
+    let ev = null;
+
+    if (dx > dy) {
+      (this.sX - dx) > 0
+        ? ev = 'left'
+        : ev = 'right';
+    } else if (dx < dy) {
+      (this.sY - dy) > 0
+      ? ev = 'up'
+      : ev = 'down';
+    }
+
+    if (ev) {
+      this.el.dispatchEvent(new CustomEvent(`swipe-${ev}`, conf))
     }
   }
 }
